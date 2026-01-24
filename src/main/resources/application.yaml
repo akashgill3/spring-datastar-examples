@@ -1,6 +1,12 @@
 spring:
   application:
     name: spring-datastar-examples
+  liquibase:
+    change-log: classpath:/db/changelog/db.changelog-master.xml
+
 gg:
   jte:
     development-mode: true
+
+server:
+  port: 7331
