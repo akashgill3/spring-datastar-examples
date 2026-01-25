@@ -1,13 +1,14 @@
 package com.akashgill3.springdatastarexamples.web;
 
-import com.akashgill3.springdatastarexamples.datastar.Datastar;
-import com.akashgill3.springdatastarexamples.datastar.SpringDatastar;
-import com.akashgill3.springdatastarexamples.datastar.events.DatastarEvent;
-import com.akashgill3.springdatastarexamples.datastar.events.PatchElementsEvent;
-import com.akashgill3.springdatastarexamples.datastar.events.PatchSignalsEvent;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import gg.jte.TemplateEngine;
 import gg.jte.output.StringOutput;
+import io.github.akashgill3.datastar.Consts;
+import io.github.akashgill3.datastar.Datastar;
+import io.github.akashgill3.datastar.DatastarSseEmitter;
+import io.github.akashgill3.datastar.events.DatastarEvent;
+import io.github.akashgill3.datastar.events.PatchElementsEvent;
+import io.github.akashgill3.datastar.events.PatchSignalsEvent;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -39,41 +40,53 @@ public class TestController {
         this.datastar = datastar;
         this.objectMapper = objectMapper;
     }
+//
+//    @GetMapping("/index")
+//    public SpringDatastar.DatastarSseEmitter index() throws IOException {
+//        String homeTemplate = renderTemplate("Home");
+//        var options = PatchElementsEvent.Options.builder()
+//                .eventId("home")
+//                .mode(PatchElementsEvent.ElementPatchMode.After)
+//                .build();
+//        var emitter = datastar.patchElements(PatchElementsEvent.withOptions(homeTemplate, options));
+//        emitter.complete();
+//        return emitter;
+//    }
 
     @GetMapping
-    public SpringDatastar.DatastarSseEmitter get(@RequestParam(name = "datastar") String datastarQuery) throws IOException {
+    public DatastarSseEmitter get(@RequestParam(name = Consts.DATASTAR_KEY) String datastarQuery) throws IOException {
         List<DatastarEvent> events = readEvents(datastarQuery);
-        SpringDatastar.DatastarSseEmitter emitter = null;
+        DatastarSseEmitter sse = datastar.createEmitter();
+
         for (DatastarEvent event : events) {
             if (event instanceof PatchElementsEvent e) {
-                emitter = datastar.patchElements(e);
+                sse.patchElements(e);
             } else if (event instanceof PatchSignalsEvent e) {
-                emitter = datastar.patchSignals(e);
+                sse.patchSignals(e);
             }
         }
-        if (emitter != null) {
-            emitter.complete();
-        }
-        return emitter;
+
+        sse.complete();
+        return sse;
     }
 
     @PostMapping
-    public SpringDatastar.DatastarSseEmitter handlePost(@RequestParam(name = "datastar") String datastarQuery) throws IOException {
+    public DatastarSseEmitter handlePost(@RequestParam(name = Consts.DATASTAR_KEY) String datastarQuery) throws IOException {
         List<DatastarEvent> events = readEvents(datastarQuery);
-        SpringDatastar.DatastarSseEmitter emitter = null;
+        DatastarSseEmitter sse = datastar.createEmitter();
+
         for (DatastarEvent event : events) {
             if (event instanceof PatchElementsEvent e) {
-                emitter = datastar.patchElements(e);
+                sse.patchElements(e);
             } else if (event instanceof PatchSignalsEvent e) {
-                emitter = datastar.patchSignals(e);
+                sse.patchSignals(e);
             } else {
                 throw new IllegalArgumentException("Unknown event type: " + event.getClass().getSimpleName());
             }
         }
-        if (emitter != null) {
-            emitter.complete();
-        }
-        return emitter;
+
+        sse.complete();
+        return sse;
     }
 
     public List<DatastarEvent> readEvents(String json) throws IOException {

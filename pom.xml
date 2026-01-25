@@ -9,7 +9,7 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>com.akashgill3</groupId>
-    <artifactId>spring-datastar-examples</artifactId>
+    <artifactId>spring-datastar</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>spring-datastar-examples</name>
     <description>spring-datastar-examples</description>
@@ -28,6 +28,14 @@
         <tag/>
         <url/>
     </scm>
+
+    <repositories>
+        <repository>
+            <id>jitpack.io</id>
+            <url>https://jitpack.io</url>
+        </repository>
+    </repositories>
+
     <properties>
         <java.version>25</java.version>
     </properties>
@@ -48,6 +56,12 @@
             <groupId>gg.jte</groupId>
             <artifactId>jte-spring-boot-starter-3</artifactId>
             <version>3.1.16</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.github.akashgill3</groupId>
+            <artifactId>datastar-spring-boot-starter</artifactId>
+            <version>0.1.0</version>
         </dependency>
 
         <dependency>
