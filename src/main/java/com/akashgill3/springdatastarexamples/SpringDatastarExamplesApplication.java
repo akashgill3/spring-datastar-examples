@@ -6,8 +6,8 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 @SpringBootApplication
 public class SpringDatastarExamplesApplication {
 
-    static void main(String[] args) {
-        SpringApplication.run(SpringDatastarExamplesApplication.class, args);
-    }
+  static void main(String[] args) {
+    SpringApplication.run(SpringDatastarExamplesApplication.class, args);
+  }
 
 }

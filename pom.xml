@@ -9,7 +9,7 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>com.akashgill3</groupId>
-    <artifactId>spring-datastar</artifactId>
+    <artifactId>spring-datastar-examples</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>spring-datastar-examples</name>
     <description>spring-datastar-examples</description>
@@ -59,9 +59,9 @@
         </dependency>
 
         <dependency>
-            <groupId>com.github.akashgill3</groupId>
+            <groupId>io.github.akashgill3</groupId>
             <artifactId>datastar-spring-boot-starter</artifactId>
-            <version>0.1.0</version>
+            <version>0.4.0-SNAPSHOT</version>
         </dependency>
 
         <dependency>

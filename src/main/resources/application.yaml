@@ -3,6 +3,9 @@ spring:
     name: spring-datastar-examples
   liquibase:
     change-log: classpath:/db/changelog/db.changelog-master.xml
+  mvc:
+    servlet:
+      load-on-startup: 1
 
 gg:
   jte:
