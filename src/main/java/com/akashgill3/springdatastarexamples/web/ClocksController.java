@@ -1,29 +1,83 @@
 package com.akashgill3.springdatastarexamples.web;
 
-import gg.jte.TemplateEngine;
-import gg.jte.output.StringOutput;
+import com.akashgill3.springdatastarexamples.TemplateRenderer;
+import io.github.akashgill3.datastar.Datastar;
+import io.github.akashgill3.datastar.DatastarSseEmitter;
+import org.jspecify.annotations.NonNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
 
+import java.time.Instant;
+import java.time.LocalTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.util.Comparator;
+import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 @Controller
 public class ClocksController {
+  private static final Logger log = LoggerFactory.getLogger(ClocksController.class);
+  private final TemplateRenderer templateRenderer;
+  private final Datastar datastar;
+  private static final Executor EXECUTOR = Executors.newVirtualThreadPerTaskExecutor();
 
-  private final TemplateEngine templateEngine;
-
-  public ClocksController(TemplateEngine templateEngine) {
-    this.templateEngine = templateEngine;
+  public ClocksController(TemplateRenderer templateRenderer, Datastar datastar) {
+    this.templateRenderer = templateRenderer;
+    this.datastar = datastar;
   }
 
-  private String renderTemplate(String templateName, Map<String, Object> attributes) {
-    StringOutput output = new StringOutput();
-    templateEngine.render(templateName.endsWith(".jte") ? templateName : templateName + ".jte", attributes, output);
-    return output.toString();
+  @GetMapping("/clock")
+  public DatastarSseEmitter streamClockTime() {
+    DatastarSseEmitter emitter = datastar.createEmitter(60_000L);
+    var formatter = DateTimeFormatter.ofPattern("HH:mm:ss");
+    EXECUTOR.execute(() -> {
+      while (true) {
+        try {
+          long start = System.nanoTime();
+          emitter.patchElements(templateRenderer.renderTemplate(
+              "components/clock",
+              Map.of("availableTimeZones", generateClockData(formatter))
+          ));
+          log.info("Time taken to render template: {} ms", (System.nanoTime() - start) / 1_000_000);
+          Thread.sleep(1000L);
+        } catch (Exception e) {
+          emitter.completeWithError(e);
+          break;
+        }
+      }
+    });
+    return emitter;
   }
 
-  private String renderTemplate(String templateName) {
-    StringOutput output = new StringOutput();
-    templateEngine.render(templateName.endsWith(".jte") ? templateName : templateName + ".jte", null, output);
-    return output.toString();
+  private static @NonNull Map<String, ClockData> generateClockData(DateTimeFormatter formatter) {
+    Instant now = Instant.now();
+    return ZoneId.getAvailableZoneIds().stream()
+        .map(ZoneId::of)
+        .map(zoneId -> Map.entry(zoneId.getRules().getOffset(now), LocalTime.now(zoneId)))
+        .sorted(Comparator.comparingInt(entry -> entry.getKey().getTotalSeconds()))
+        .collect(LinkedHashMap::new,
+            (map, entry) -> {
+          int hour = entry.getValue().getHour();
+          int minute = entry.getValue().getMinute();
+          int second = entry.getValue().getSecond();
+
+          // Calculate angles (0° = 12 o'clock, clockwise)
+          double hourAngle = (hour % 12) * 30 + minute * 0.5; // 30° per hour + minute adjustment
+          double minuteAngle = minute * 6 + second * 0.1; // 6° per minute + second adjustment
+          double secondAngle = second * 6; // 6° per second
+
+          map.put(
+              entry.getKey().getId(),
+              new ClockData(entry.getValue().format(formatter), hourAngle, minuteAngle, secondAngle)
+          );
+        }, Map::putAll);
   }
+
+  public record ClockData(String time, double hourAngle, double minuteAngle, double secondAngle) {}
+
 }

@@ -29,13 +29,6 @@
         <url/>
     </scm>
 
-    <repositories>
-        <repository>
-            <id>jitpack.io</id>
-            <url>https://jitpack.io</url>
-        </repository>
-    </repositories>
-
     <properties>
         <java.version>25</java.version>
     </properties>
@@ -57,11 +50,10 @@
             <artifactId>jte-spring-boot-starter-3</artifactId>
             <version>3.1.16</version>
         </dependency>
-
         <dependency>
             <groupId>io.github.akashgill3</groupId>
             <artifactId>datastar-spring-boot-starter</artifactId>
-            <version>0.4.0-SNAPSHOT</version>
+            <version>0.3.3</version>
         </dependency>
 
         <dependency>
@@ -82,7 +74,7 @@
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-webmvc-test</artifactId>
+            <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
     </dependencies>
